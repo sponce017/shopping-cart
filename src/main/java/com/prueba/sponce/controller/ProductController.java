@@ -1,8 +1,10 @@
 package com.prueba.sponce.controller;
 
+import com.prueba.sponce.dto.ApiResponse;
 import com.prueba.sponce.dto.ProductDto;
 import com.prueba.sponce.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -15,12 +17,14 @@ public class ProductController {
     private final ProductService productService;
 
     @GetMapping
-    public Flux<ProductDto> getAllProducts() {
-        return productService.getAllProducts();
+    public Mono<ResponseEntity<ApiResponse<Flux<ProductDto>>>> getAll() {
+        Flux<ProductDto> products = productService.getAllProducts();
+        return Mono.just(ResponseEntity.ok(new ApiResponse<>("Products retrieved successfully", products)));
     }
 
     @GetMapping("/{id}")
-    public Mono<ProductDto> getProductById(@PathVariable Long id) {
-        return productService.getProductById(id);
+    public Mono<ResponseEntity<ApiResponse<Mono<ProductDto>>>> getById(@PathVariable Long id) {
+        Mono<ProductDto> product = productService.getProductById(id);
+        return Mono.just(ResponseEntity.ok(new ApiResponse<>("Product retrieved successfully", product)));
     }
 }

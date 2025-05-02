@@ -16,4 +16,9 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiResponse<String>> handleGeneral(Exception ex) {
         return ResponseEntity.status(500).body(new ApiResponse<>("Unexpected error", ex.getMessage()));
     }
+
+    @ExceptionHandler(ProductNotFoundException.class)
+    public ResponseEntity<ApiResponse<String>> handleProductNotFound(ProductNotFoundException ex) {
+        return ResponseEntity.status(404).body(new ApiResponse<>("Product not found", ex.getMessage()));
+    }
 }

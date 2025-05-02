@@ -1,10 +1,12 @@
 package com.prueba.sponce.client;
 
 import com.prueba.sponce.dto.ProductDto;
+import com.prueba.sponce.exception.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -32,6 +34,8 @@ public class ProductApiClient {
                 .get()
                 .uri("/products/{id}", id)
                 .retrieve()
-                .bodyToMono(ProductDto.class);
+                .bodyToMono(ProductDto.class)
+                .onErrorResume(WebClientResponseException.NotFound.class,
+                        ex -> Mono.error(new ProductNotFoundException(id)));
     }
 }
