@@ -3,3 +3,12 @@ server:
 
 fake-store:
   base-url: https://fakestoreapi.com
+
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: update
+  sql:
+    init:
+      mode: always
+
