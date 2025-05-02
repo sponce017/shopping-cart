@@ -1,9 +1,11 @@
 package com.prueba.sponce.controller;
 
+import com.prueba.sponce.dto.ApiResponse;
+import com.prueba.sponce.dto.OrderDto;
 import com.prueba.sponce.dto.OrderRequestDto;
-import com.prueba.sponce.model.Order;
 import com.prueba.sponce.service.OrderService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,17 +18,20 @@ public class OrderController {
     private final OrderService orderService;
 
     @PostMapping
-    public Order create(@RequestBody OrderRequestDto dto) {
-        return orderService.createOrder(dto);
+    public ResponseEntity<ApiResponse<OrderDto>> create(@RequestBody OrderRequestDto dto) {
+        OrderDto created = orderService.createOrder(dto);
+        return ResponseEntity.ok(new ApiResponse<>("Order created successfully", created));
     }
 
     @GetMapping
-    public List<Order> getAll() {
-        return orderService.getAllOrders();
+    public ResponseEntity<ApiResponse<List<OrderDto>>> getAll() {
+        List<OrderDto> orders = orderService.getAllOrders();
+        return ResponseEntity.ok(new ApiResponse<>("Orders retrieved successfully", orders));
     }
 
     @PutMapping("/{id}/pay")
-    public Order pay(@PathVariable Long id) {
-        return orderService.payOrder(id);
+    public ResponseEntity<ApiResponse<OrderDto>> pay(@PathVariable Long id) {
+        OrderDto paid = orderService.payOrder(id);
+        return ResponseEntity.ok(new ApiResponse<>("Order paid successfully", paid));
     }
 }

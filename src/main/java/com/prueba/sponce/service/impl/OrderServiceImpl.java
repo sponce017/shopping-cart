@@ -2,6 +2,7 @@ package com.prueba.sponce.service.impl;
 
 import com.prueba.sponce.client.ProductApiClient;
 import com.prueba.sponce.dto.*;
+import com.prueba.sponce.exception.OrderNotFoundException;
 import com.prueba.sponce.model.*;
 import com.prueba.sponce.repository.OrderRepository;
 import com.prueba.sponce.service.OrderService;
@@ -19,11 +20,11 @@ public class OrderServiceImpl implements OrderService {
     private final ProductApiClient productApiClient;
 
     @Override
-    public Order createOrder(OrderRequestDto request) {
+    public OrderDto createOrder(OrderRequestDto request) {
         List<OrderItem> items = new ArrayList<>();
 
         for (Long productId : request.getProductIds()) {
-            ProductDto product = productApiClient.getProductById(productId).block(); // llamada reactiva bloqueante
+            ProductDto product = productApiClient.getProductById(productId).block(); // llamado reactivo bloqueante
 
             items.add(OrderItem.builder()
                     .productId(product.getId())
@@ -52,18 +53,59 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderDetail(detail);
         items.forEach(item -> item.setOrder(order));
 
-        return orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        return convertToDto(savedOrder);
     }
 
     @Override
-    public List<Order> getAllOrders() {
-        return orderRepository.findAll();
+    public List<OrderDto> getAllOrders() {
+        return orderRepository.findAll().stream()
+                .map(this::convertToDto)
+                .toList();
     }
 
     @Override
-    public Order payOrder(Long id) {
-        Order order = orderRepository.findById(id).orElseThrow();
+    public OrderDto payOrder(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException(id));
+
         order.setPaid(true);
-        return orderRepository.save(order);
+        return convertToDto(orderRepository.save(order));
+    }
+
+    private OrderDto convertToDto(Order order) {
+        OrderDto dto = new OrderDto();
+        dto.setId(order.getId());
+        dto.setPaid(order.isPaid());
+
+        // Client
+        ClientDto clientDto = new ClientDto();
+        clientDto.setId(order.getClient().getId());
+        clientDto.setName(order.getClient().getName());
+        clientDto.setEmail(order.getClient().getEmail());
+        dto.setClient(clientDto);
+
+        // OrderDetail
+        if (order.getOrderDetail() != null) {
+            OrderDetailDto detailDto = new OrderDetailDto();
+            detailDto.setId(order.getOrderDetail().getId());
+            detailDto.setShippingAddress(order.getOrderDetail().getShippingAddress());
+            detailDto.setNotes(order.getOrderDetail().getNotes());
+            dto.setOrderDetail(detailDto);
+        }
+
+        // Items
+        List<OrderItemDto> itemDtos = new ArrayList<>();
+        for (OrderItem item : order.getItems()) {
+            OrderItemDto itemDto = new OrderItemDto();
+            itemDto.setId(item.getId());
+            itemDto.setProductId(item.getProductId());
+            itemDto.setProductTitle(item.getProductTitle());
+            itemDto.setPrice(item.getPrice());
+            itemDtos.add(itemDto);
+        }
+        dto.setItems(itemDtos);
+
+        return dto;
     }
 }
