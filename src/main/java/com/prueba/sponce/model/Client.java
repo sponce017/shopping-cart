@@ -8,16 +8,11 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderItem {
+public class Client {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long productId;
-    private String productTitle;
-    private Double price;
-
-    @ManyToOne
-    @JoinColumn(name = "order_id")
-    private Order order;
+    private String name;
+    private String email;
 }

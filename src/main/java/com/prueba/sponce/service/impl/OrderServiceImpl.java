@@ -1,16 +1,13 @@
 package com.prueba.sponce.service.impl;
 
-import com.prueba.sponce.dto.OrderRequestDto;
-import com.prueba.sponce.dto.ProductDto;
-import com.prueba.sponce.model.Order;
-import com.prueba.sponce.model.OrderItem;
+import com.prueba.sponce.dto.*;
+import com.prueba.sponce.model.*;
 import com.prueba.sponce.repository.OrderRepository;
 import com.prueba.sponce.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Mono;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -44,12 +41,24 @@ public class OrderServiceImpl implements OrderService {
                     .build());
         }
 
+        Client client = Client.builder()
+                .name(request.getClient().getName())
+                .email(request.getClient().getEmail())
+                .build();
+
         Order order = Order.builder()
-                .clientName(request.getClientName())
+                .client(client)
                 .paid(false)
                 .items(items)
                 .build();
 
+        OrderDetail detail = OrderDetail.builder()
+                .shippingAddress(request.getOrderDetail().getShippingAddress())
+                .notes(request.getOrderDetail().getNotes())
+                .order(order)
+                .build();
+
+        order.setOrderDetail(detail);
         items.forEach(item -> item.setOrder(order));
 
         return orderRepository.save(order);
