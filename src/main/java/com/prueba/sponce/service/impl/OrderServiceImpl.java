@@ -24,7 +24,7 @@ public class OrderServiceImpl implements OrderService {
         List<OrderItem> items = new ArrayList<>();
 
         for (Long productId : request.getProductIds()) {
-            ProductDto product = productApiClient.getProductById(productId).block(); // llamado reactivo bloqueante
+            ProductDto product = productApiClient.getProductById(productId).block(); // <- aquí usamos block()
 
             items.add(OrderItem.builder()
                     .productId(product.getId())
@@ -78,14 +78,12 @@ public class OrderServiceImpl implements OrderService {
         dto.setId(order.getId());
         dto.setPaid(order.isPaid());
 
-        // Client
         ClientDto clientDto = new ClientDto();
         clientDto.setId(order.getClient().getId());
         clientDto.setName(order.getClient().getName());
         clientDto.setEmail(order.getClient().getEmail());
         dto.setClient(clientDto);
 
-        // OrderDetail
         if (order.getOrderDetail() != null) {
             OrderDetailDto detailDto = new OrderDetailDto();
             detailDto.setId(order.getOrderDetail().getId());
@@ -94,7 +92,6 @@ public class OrderServiceImpl implements OrderService {
             dto.setOrderDetail(detailDto);
         }
 
-        // Items
         List<OrderItemDto> itemDtos = new ArrayList<>();
         for (OrderItem item : order.getItems()) {
             OrderItemDto itemDto = new OrderItemDto();
@@ -104,8 +101,8 @@ public class OrderServiceImpl implements OrderService {
             itemDto.setPrice(item.getPrice());
             itemDtos.add(itemDto);
         }
-        dto.setItems(itemDtos);
 
+        dto.setItems(itemDtos);
         return dto;
     }
 }
