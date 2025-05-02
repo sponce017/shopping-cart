@@ -9,4 +9,5 @@ public interface OrderService {
     OrderDto createOrder(OrderRequestDto request);
     List<OrderDto> getAllOrders();
     OrderDto payOrder(Long id);
+    OrderDto getOrderById(Long id);
 }

@@ -73,6 +73,13 @@ public class OrderServiceImpl implements OrderService {
         return convertToDto(orderRepository.save(order));
     }
 
+    @Override
+    public OrderDto getOrderById(Long id) {
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new OrderNotFoundException(id));
+        return convertToDto(order);
+    }
+
     private OrderDto convertToDto(Order order) {
         OrderDto dto = new OrderDto();
         dto.setId(order.getId());
