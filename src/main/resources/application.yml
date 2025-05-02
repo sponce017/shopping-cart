@@ -1,0 +1,5 @@
+server:
+  port: 8080
+
+fake-store:
+  base-url: https://fakestoreapi.com
