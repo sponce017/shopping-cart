@@ -4,38 +4,33 @@ import com.prueba.sponce.dto.ProductDto;
 import com.prueba.sponce.exception.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.web.reactive.function.client.WebClient;
-import org.springframework.web.reactive.function.client.WebClientResponseException;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+import org.springframework.web.client.HttpClientErrorException.NotFound;
+import org.springframework.web.client.RestTemplate;
+
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class ProductApiClient {
 
-    private final WebClient.Builder webClientBuilder;
-
     @Value("${fake-store.base-url}")
     private String baseUrl;
 
-    public Flux<ProductDto> getAllProducts() {
-        return webClientBuilder.baseUrl(baseUrl)
-                .build()
-                .get()
-                .uri("/products")
-                .retrieve()
-                .bodyToFlux(ProductDto.class);
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    public List<ProductDto> getAllProducts() {
+        ResponseEntity<ProductDto[]> response = restTemplate.getForEntity(baseUrl + "/products", ProductDto[].class);
+        return Arrays.asList(response.getBody());
     }
 
-    public Mono<ProductDto> getProductById(Long id) {
-        return webClientBuilder.baseUrl(baseUrl)
-                .build()
-                .get()
-                .uri("/products/{id}", id)
-                .retrieve()
-                .bodyToMono(ProductDto.class)
-                .onErrorResume(WebClientResponseException.NotFound.class,
-                        ex -> Mono.error(new ProductNotFoundException(id)));
+    public ProductDto getProductById(Long id) {
+        try {
+            return restTemplate.getForObject(baseUrl + "/products/" + id, ProductDto.class);
+        } catch (NotFound ex) {
+            throw new ProductNotFoundException(id);
+        }
     }
 }

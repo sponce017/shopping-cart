@@ -24,7 +24,7 @@ public class OrderServiceImpl implements OrderService {
         List<OrderItem> items = new ArrayList<>();
 
         for (Long productId : request.getProductIds()) {
-            ProductDto product = productApiClient.getProductById(productId).block(); // <- aquí usamos block()
+            ProductDto product = productApiClient.getProductById(productId);
 
             items.add(OrderItem.builder()
                     .productId(product.getId())

@@ -5,8 +5,8 @@ import com.prueba.sponce.dto.ProductDto;
 import com.prueba.sponce.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -15,12 +15,12 @@ public class ProductServiceImpl implements ProductService {
     private final ProductApiClient productApiClient;
 
     @Override
-    public Flux<ProductDto> getAllProducts() {
+    public List<ProductDto> getAllProducts() {
         return productApiClient.getAllProducts();
     }
 
     @Override
-    public Mono<ProductDto> getProductById(Long id) {
+    public ProductDto getProductById(Long id) {
         return productApiClient.getProductById(id);
     }
 }
